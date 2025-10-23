@@ -14,35 +14,15 @@ import resumeRoute from './routes/resume.js';
 
 const app = express();
 
-// --- Configure CORS ---
-// Define the allowed origins (your frontend URLs)
-const allowedOrigins = [
-    'http://localhost:5173', // Your local development frontend
-    'https://ai-resume-builder-ten-vert.vercel.app' // Your live Vercel frontend URL
-    // Add any other domains you might deploy to in the future
-];
+// --- NEW Simplified CORS Setup ---
+// Apply cors middleware *first* to handle all incoming requests, including OPTIONS
+app.use(cors({
+    origin: 'https://ai-resume-builder-ten-vert.vercel.app', // Allow ONLY your Vercel domain
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],    // Explicitly allow methods
+    allowedHeaders: ['Content-Type', 'Authorization']    // Explicitly allow headers
+}));
+// ------------------------------
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, postman)
-    // or requests from domains in the allowedOrigins list
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true); // Allow the request
-    } else {
-      console.error(`CORS blocked for origin: ${origin}`); // Log blocked origins for debugging
-      callback(new Error('The CORS policy for this site does not allow access from the specified Origin.')); // Block the request
-    }
-  },
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Explicitly list methods including OPTIONS
-  allowedHeaders: ['Content-Type', 'Authorization'], // Explicitly list headers
-  credentials: false // Set to true if you were using cookies/sessions
-};
-
-// Apply CORS middleware *before* other middleware/routes
-app.use(cors(corsOptions));
-
-// --- The app.options('*', ...) line has been removed ---
-// --- End CORS Configuration ---
 
 // Standard Middleware (AFTER CORS)
 app.use(express.json()); // To parse JSON request bodies
