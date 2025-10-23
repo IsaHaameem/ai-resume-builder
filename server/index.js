@@ -41,8 +41,7 @@ const corsOptions = {
 // Apply CORS middleware *before* other middleware/routes
 app.use(cors(corsOptions));
 
-// Handle Preflight Requests explicitly (sometimes needed for complex requests like file uploads)
-app.options('*', cors(corsOptions));
+// --- The app.options('*', ...) line has been removed ---
 // --- End CORS Configuration ---
 
 // Standard Middleware (AFTER CORS)
