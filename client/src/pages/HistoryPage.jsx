@@ -100,7 +100,7 @@ const HistoryPage = ({ user }) => {
 
       // 1. Fetch the saved formData and template
       console.log(`Fetching data for resume ID: ${resumeId}`);
-      const dataRes = await axios.get(`http://localhost:5001/api/resume/${resumeId}`, {
+      const dataRes = await axios.get(`https://ai-resume-api-f7go.onrender.com/api/resume/${resumeId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const { formData, templateUsed } = dataRes.data;
@@ -124,7 +124,7 @@ const HistoryPage = ({ user }) => {
         template: templateUsed // Pass template name along
       };
 
-      const genRes = await axios.post('http://localhost:5001/api/generate', generationPayload, {
+      const genRes = await axios.post('https://ai-resume-api-f7go.onrender.com/api/generate', generationPayload, {
          headers: { 'Authorization': `Bearer ${token}` }
       });
       const resumeJSON = genRes.data.resume;

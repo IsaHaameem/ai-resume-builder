@@ -45,7 +45,7 @@ const ResumeBuilderForm = ({ user, formData, setFormData, template, setTemplate,
 
     try {
       const token = await user.getIdToken();
-      const response = await axios.post('http://localhost:5001/api/generate', payload, {
+      const response = await axios.post('https://ai-resume-api-f7go.onrender.com/api/generate', payload, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setGeneratedResume(response.data.resume);

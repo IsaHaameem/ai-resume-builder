@@ -177,7 +177,7 @@ const UploadModule = ({ user }) => {
       formData.append('jobDescription', jobDescription); // Add job description
 
       // Send the file to our backend
-      const response = await axios.post('http://localhost:5001/api/upload', formData, {
+      const response = await axios.post('https://ai-resume-api-f7go.onrender.com/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}` // Send the token
