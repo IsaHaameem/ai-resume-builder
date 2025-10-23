@@ -1,48 +1,79 @@
-// --- THIS IS THE FIX ---
 // Load environment variables *before* anything else.
 import dotenv from 'dotenv';
 dotenv.config();
-// -----------------------
 
 import express from 'express';
-
-import cors from 'cors';
+import cors from 'cors'; // Import cors
 import mongoose from 'mongoose';
 
-// Now we can safely import other files that use the .env variables
-import uploadRoute from './routes/upload.js'; 
+// Import API route handlers
+import uploadRoute from './routes/upload.js';
 import generateRoute from './routes/generate.js';
 import historyRoute from './routes/history.js';
 import resumeRoute from './routes/resume.js';
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// --- Configure CORS ---
+// Define the allowed origins (your frontend URLs)
+const allowedOrigins = [
+    'http://localhost:5173', // Your local development frontend
+    'https://ai-resume-builder-ten-vert.vercel.app' // Your live Vercel frontend URL
+    // Add any other domains you might deploy to in the future
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    // or requests from domains in the allowedOrigins list
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true); // Allow the request
+    } else {
+      console.error(`CORS blocked for origin: ${origin}`); // Log blocked origins for debugging
+      callback(new Error('The CORS policy for this site does not allow access from the specified Origin.')); // Block the request
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Specify allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  credentials: false // Set to true if you were using cookies/sessions
+}));
+// --- End CORS Configuration ---
+
+// Standard Middleware
 app.use(express.json()); // To parse JSON request bodies
 
-// API Routes
+// API Routes - Mount the route handlers
 app.use('/api/upload', uploadRoute);
 app.use('/api/generate', generateRoute);
 app.use('/api/history', historyRoute);
 app.use('/api/resume', resumeRoute);
 
-// A simple test route
+// Simple Base Route (for testing if the server is running)
 app.get('/', (req, res) => {
   res.send('AI Resume Builder API is running!');
 });
 
-const PORT = process.env.PORT || 5001; 
-const MONGO_URI = process.env.MONGO_URI; // This will now be loaded
+// Environment Variables for Server and Database
+const PORT = process.env.PORT || 5001; // Use Render's PORT or default to 5001
+const MONGO_URI = process.env.MONGO_URI;
 
-// Connect to MongoDB and start the server
+// Input validation for critical environment variables
+if (!MONGO_URI) {
+    console.error('CRITICAL ERROR: MONGO_URI environment variable is not defined.');
+    process.exit(1); // Exit if DB connection string is missing
+}
+
+// Connect to MongoDB Database and Start Server
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
+    // Start listening for requests only after successful DB connection
     app.listen(PORT, () => {
       console.log(`Server running on port: ${PORT}`);
     });
   })
   .catch((error) => {
+    // Log detailed error if MongoDB connection fails
     console.error('MongoDB connection error:', error.message);
+    process.exit(1); // Exit the application if it cannot connect to the database
   });
