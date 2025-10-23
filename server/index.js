@@ -22,7 +22,7 @@ const allowedOrigins = [
     // Add any other domains you might deploy to in the future
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps, curl, postman)
     // or requests from domains in the allowedOrigins list
@@ -33,16 +33,22 @@ app.use(cors({
       callback(new Error('The CORS policy for this site does not allow access from the specified Origin.')); // Block the request
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Specify allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Explicitly list methods including OPTIONS
+  allowedHeaders: ['Content-Type', 'Authorization'], // Explicitly list headers
   credentials: false // Set to true if you were using cookies/sessions
-}));
+};
+
+// Apply CORS middleware *before* other middleware/routes
+app.use(cors(corsOptions));
+
+// Handle Preflight Requests explicitly (sometimes needed for complex requests like file uploads)
+app.options('*', cors(corsOptions));
 // --- End CORS Configuration ---
 
-// Standard Middleware
+// Standard Middleware (AFTER CORS)
 app.use(express.json()); // To parse JSON request bodies
 
-// API Routes - Mount the route handlers
+// API Routes - Mount the route handlers (AFTER CORS and express.json)
 app.use('/api/upload', uploadRoute);
 app.use('/api/generate', generateRoute);
 app.use('/api/history', historyRoute);
